@@ -26,15 +26,14 @@
 
 ## 📖 Sobre o Projeto
 
-Este projeto oferece um **workflow n8n pronto para uso** que monitora a disponibilidade de APIs através de testes sintéticos periódicos. Quando uma falha é detectada, um **alerta HTML profissional** é enviado por email com todos os detalhes do incidente.
+Este projeto oferece um **workflow n8n pronto para uso** que monitora a disponibilidade de APIs através de testes sintéticos periódicos. Quando uma falha é detectada, um **alerta HTML** é enviado por email com todos os detalhes do incidente.
 
-**O que são testes sintéticos?** São requisições automáticas feitas em intervalos regulares para verificar se uma API está respondendo corretamente. Diferente de monitoramento passivo (que depende de tráfego real), testes sintéticos detectam problemas **antes** que os usuários sejam impactados.
+**O que são testes sintéticos?** São requisições automáticas feitas em intervalos regulares para verificar se uma API ou uma URL estão respondendo corretamente. Diferente de monitoramento passivo (que depende de tráfego real), testes sintéticos detectam problemas **antes** que os usuários sejam impactados.
 
 ### Por que usar isto?
 
 - **Zero custo** — roda no n8n (self-hosted ou cloud)
-- **Pronto em 10 minutos** — importe o workflow e configure
-- **Alertas profissionais** — template HTML responsivo compatível com Gmail, Outlook e Apple Mail
+- **Envio de comunicação** — template HTML responsivo compatível com Gmail, Outlook e Apple Mail
 - **Flexível** — monitore qualquer endpoint HTTP/HTTPS
 - **Extensível** — adicione Slack, Teams, Discord, PagerDuty ou qualquer webhook
 
@@ -128,6 +127,8 @@ docker run -d \
 
 Acesse: `http://localhost:5678`
 
+OBS: Nesse ponto, caso esteja executando k8s através do wsl, quando tentar acessar o http://localhost:5678, o navegador devolva um ERR_CONNECTION, nesse caso, basta executar de dentro do WSL o comando 
+**kubectl port-forward -n monitoring svc/n8n 5678:5678** Isso vai expor a porta do serviço do k8s e será possivel acessar via host windows.
 </details>
 
 <details>
