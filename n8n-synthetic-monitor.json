@@ -1,0 +1,234 @@
+{
+  "name": "Synthetic Monitor - teste.com.br",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 5
+            }
+          ]
+        }
+      },
+      "id": "1",
+      "name": "A cada 5 minutos",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "url": "https://teste.com.br/teste",
+        "options": {
+          "timeout": 10000,
+          "fullResponse": true
+        }
+      },
+      "id": "2",
+      "name": "GET /teste",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [220, 0],
+      "onError": "continueRegularOutput",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const startTime = Date.now();\nconst item = $input.first().json;\n\n// Dados da resposta\nconst statusCode = item.statusCode || 0;\nconst body = item.body || '';\nconst headers = item.headers || {};\nconst error = item.error || null;\n\n// Calcula tempo de resposta\nconst responseTime = Date.now() - startTime;\n\n// Validações\nconst isUp = statusCode >= 200 && statusCode < 400;\nconst isFast = responseTime < 2000;\nconst hasBody = typeof body === 'string' ? body.length > 0 : Object.keys(body).length > 0;\n\n// Status geral\nconst healthy = isUp && isFast && hasBody;\n\nreturn [{\n  json: {\n    timestamp: new Date().toISOString(),\n    endpoint: 'https://teste.com.br/teste',\n    statusCode,\n    responseTimeMs: responseTime,\n    bodySize: typeof body === 'string' ? body.length : JSON.stringify(body).length,\n    checks: {\n      isUp,\n      isFast,\n      hasBody\n    },\n    healthy,\n    error: error ? error.message || String(error) : null\n  }\n}];"
+      },
+      "id": "3",
+      "name": "Avaliar Resposta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [440, 0]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "healthy-check",
+              "leftValue": "={{ $json.healthy }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "4",
+      "name": "Saudável?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [660, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\n\nconst log = {\n  ...data,\n  status: 'OK',\n  message: `✅ API saudável | Status: ${data.statusCode} | Tempo: ${data.responseTimeMs}ms`\n};\n\nconsole.log(log.message);\n\nreturn [{ json: log }];"
+      },
+      "id": "5",
+      "name": "Log OK",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [880, -120]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\n\nconst failures = [];\nif (!data.checks.isUp) failures.push(`Status ${data.statusCode} (esperado 2xx)`);\nif (!data.checks.isFast) failures.push(`Lento: ${data.responseTimeMs}ms (limite: 2000ms)`);\nif (!data.checks.hasBody) failures.push('Corpo vazio');\nif (data.error) failures.push(`Erro: ${data.error}`);\n\nconst alert = {\n  ...data,\n  status: 'FALHA',\n  failures,\n  message: `🚨 ALERTA - teste.com.br/teste\\n\\nStatus: ${data.statusCode}\\nTempo: ${data.responseTimeMs}ms\\nProblemas:\\n${failures.map(f => `  • ${f}`).join('\\n')}\\n\\nTimestamp: ${data.timestamp}`\n};\n\nconsole.log(alert.message);\n\nreturn [{ json: alert }];"
+      },
+      "id": "6",
+      "name": "Montar Alerta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [880, 120]
+    },
+    {
+      "parameters": {
+        "channel": "#alertas-monitoring",
+        "text": "={{ $json.message }}",
+        "otherOptions": {}
+      },
+      "id": "7",
+      "name": "Slack Alert",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [1100, 40],
+      "disabled": true,
+      "notesInFlow": true,
+      "notes": "Desabilitado - Configure suas credenciais Slack e habilite"
+    },
+    {
+      "parameters": {
+        "sendTo": "seuemail@empresa.com",
+        "subject": "🚨 Synthetic Monitor - teste.com.br DOWN",
+        "message": "={{ $json.message }}"
+      },
+      "id": "8",
+      "name": "Email Alert",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [1100, 200],
+      "disabled": true,
+      "notesInFlow": true,
+      "notes": "Desabilitado - Configure suas credenciais SMTP e habilite"
+    },
+    {
+      "parameters": {
+        "url": "https://SEU-WEBHOOK-URL-AQUI",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "payload",
+              "value": "={{ JSON.stringify($json) }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9",
+      "name": "Webhook Alert",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1100, 360],
+      "disabled": true,
+      "notesInFlow": true,
+      "notes": "Desabilitado - Coloque a URL do seu webhook (Teams, Discord, PagerDuty, etc)"
+    }
+  ],
+  "connections": {
+    "A cada 5 minutos": {
+      "main": [
+        [
+          {
+            "node": "GET /teste",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET /teste": {
+      "main": [
+        [
+          {
+            "node": "Avaliar Resposta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Avaliar Resposta": {
+      "main": [
+        [
+          {
+            "node": "Saudável?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Saudável?": {
+      "main": [
+        [
+          {
+            "node": "Log OK",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Montar Alerta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar Alerta": {
+      "main": [
+        [
+          {
+            "node": "Slack Alert",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Email Alert",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Webhook Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "name": "synthetic-monitoring"
+    },
+    {
+      "name": "availability"
+    }
+  ]
+}
