@@ -3,7 +3,7 @@
 <h1 align="center">n8n Synthetic Monitor</h1>
 
 <p align="center">
-  <strong>Monitoramento sintético de APIs com n8n — alertas inteligentes por email com templates HTML profissionais.</strong>
+  <strong>Monitoramento sintético de APIs com n8n </strong>
 </p>
 
 <p align="center">
