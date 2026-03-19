@@ -1,6 +1,4 @@
-<p align="center">
-  <img src="docs/images/banner.png" alt="n8n Synthetic Monitor" width="800">
-</p>
+
 
 <h1 align="center">n8n Synthetic Monitor</h1>
 
@@ -251,9 +249,7 @@ Habilite o nó **"Webhook Alert"** e cole a URL.
 
 O projeto inclui um template HTML profissional para alertas por email, compatível com os principais clientes de email.
 
-<p align="center">
-  <img src="docs/images/email-preview.png" alt="Preview do alerta por email" width="500">
-</p>
+
 
 ### O que o email inclui
 
@@ -388,5 +384,5 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 ---
 
 <p align="center">
-  <sub>Feito com ☕ por <a href="https://github.com/alerodriguesdesouza">Ale Rodrigues de Souza</a></sub>
+  <sub>Feito com ☕ por <a href="https://github.com/alerodriguesdesouza">Alessandro Rodrigues de Souza</a></sub>
 </p>
