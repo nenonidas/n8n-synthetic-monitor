@@ -74,7 +74,7 @@ Este projeto oferece um **workflow n8n pronto para uso** que monitora a disponib
 
 ```bash
 # 1. Clone o repositório
-git clone https://github.com/alerodriguesdesouza/n8n-synthetic-monitor.git
+git clone https://github.com/nenonidas/n8n-synthetic-monitor.git
 
 # 2. Abra o n8n e importe o workflow
 #    Menu lateral → Import from File → selecione workflows/n8n-synthetic-monitor.json
